@@ -17,7 +17,7 @@ def dat2pos(r, data, nx, ny, res, val):
     else:
         return val
 
-def fdtd(nx, ny, npml, res, fcen, jx, jy, jz, eps):
+def fdtd(nx, ny, npml, res, fcen, jx, jy, jz, mz, eps):
 
     # Define epsilon and source function
     def eps_func(p):
@@ -37,6 +37,9 @@ def fdtd(nx, ny, npml, res, fcen, jx, jy, jz, eps):
 
     def jz_func(p):
         return dat2pos(p, jz, nx, ny, res, 0)
+
+    def mz_func(p):
+        return dat2pos(p, mz, nx, ny, res, 0)
 
     # Define simulation region
     Lx = nx / res
@@ -59,7 +62,12 @@ def fdtd(nx, ny, npml, res, fcen, jx, jy, jz, eps):
                          component=mp.Ez,
                          center=mp.Vector3(0, 0, 0),
                          size=cell,
-                         amp_func=jz_func)]
+                         amp_func=jz_func),
+               mp.Source(mp.GaussianSource(fcen, fwidth=0.2),
+                         component=mp.Hz,
+                         center=mp.Vector3(0, 0, 0),
+                         size=cell,
+                         amp_func=mz_func)]
 
     sim = mp.Simulation(cell_size=cell,
                         boundary_layers=[mp.PML(dpml)],
